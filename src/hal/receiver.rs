@@ -46,6 +46,73 @@ where
     }
 }
 
+pub struct CaptureReceiver<Pin> {
+    pin: Pin,
+    /// Internal sample counter
+    counter: u16,
+    pub buf: [u16; 64],
+    pub pos: usize,
+    pub last_edge: bool,
+    pub last_edge_t: u16,
+    pub samplerate: u32,
+    pub timeout: u16,
+}
+
+impl<Pin, PinErr> CaptureReceiver<Pin>
+where
+    Pin: InputPin<Error=PinErr>,
+{
+    pub fn new(pin: Pin, samplerate: u32, timeout: u16) -> Self {
+        Self {
+            pin,
+            counter: 0,
+            buf: [0; 64],
+            pos: 0,
+            last_edge: false,
+            last_edge_t: 0,
+            samplerate,
+            timeout,
+        }
+    }
+
+    pub fn poll(&mut self) -> Result<bool, PinErr> {
+        let pin = self.pin.is_low()?;
+
+        self.counter = self.counter.wrapping_add(1);
+
+        // Buffer full. Time to decode
+        if usize::from(self.counter) >= self.buf.len() {
+            return Ok(true);
+        }
+
+        // Check for timeout
+        if self.pos != 0 && (self.counter.wrapping_sub(self.last_edge_t) > self.timeout) {
+            return Ok(true);
+        }
+
+        if pin != self.last_edge {
+            self.buf[self.pos] = self.counter;
+            self.pos += 1;
+            self.last_edge = pin;
+        }
+
+        Ok(false)
+    }
+
+    pub fn buf(&self) -> &[u16] {
+        &self.buf[0..self.pos]
+    }
+
+    pub fn reset(&mut self) {
+        self.counter = 0;
+        self.pos = 0;
+        self.last_edge = false;
+        self.last_edge_t = 0;
+    }
+}
+
+
+
 /// Periodic and polled Embedded hal Receiver
 ///
 /// The poll methods should be called periodically for this receiver to work
