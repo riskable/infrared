@@ -18,7 +18,8 @@ pub struct NecReceiverState<C = NecCommand> {
     // Timing and tolerances
     ranges: InfraRange4,
     // Last command (used by repeat)
-    last_cmd: u32,
+    last_addr: u16,
+    last_cmd: u16,
     // Nec Command type
     cmd_type: PhantomData<C>,
     // Saved dt
@@ -35,6 +36,7 @@ impl<C: NecCommandVariant> InfraredReceiverState for NecReceiverState<C> {
             bitbuf_addr: 0,
             bitbuf_cmd: 0,
             ranges,
+            last_addr: 0,
             last_cmd: 0,
             cmd_type: Default::default(),
             dt_save: 0,
@@ -49,11 +51,13 @@ impl<C: NecCommandVariant> InfraredReceiverState for NecReceiverState<C> {
         //};
 
         self.status = InternalStatus::Init;
-        //self.last_cmd = if self.bitbuf_addr == 0 {
-        //    self.last_cmd
-        //} else {
-        //    self.bitbuf_addr
-        //};
+
+        // Repeats
+        if !(self.bitbuf_addr == 0 && self.bitbuf_cmd == 0) {
+            self.last_addr = self.bitbuf_addr;
+            self.last_cmd = self.bitbuf_cmd;
+        }
+
         self.bitbuf_addr = 0;
         self.bitbuf_cmd = 0;
         self.dt_save = 0;
@@ -138,7 +142,7 @@ where
     fn command(state: &Self::ReceiverState) -> Option<Self::Cmd> {
         match state.status {
             InternalStatus::Done => Self::Cmd::unpack(state.bitbuf_addr, state.bitbuf_cmd, false),
-            InternalStatus::RepeatDone => Self::Cmd::unpack(state.bitbuf_addr, state.bitbuf_cmd, true),
+            InternalStatus::RepeatDone => Self::Cmd::unpack(state.last_addr, state.last_cmd, true),
             _ => None,
         }
     }
