@@ -15,7 +15,7 @@ pub mod sbp;
 pub use denon::Denon;
 #[cfg(feature = "nec")]
 #[doc(inline)]
-pub use nec::{Nec, Nec16, NecApple, NecDebug, NecSamsung};
+pub use nec::{Nec, };
 #[cfg(feature = "rc5")]
 #[doc(inline)]
 pub use rc5::Rc5;

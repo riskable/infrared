@@ -25,9 +25,9 @@ impl NecCommandVariant for NecCommand {
         ((bits >> 24) ^ (bits >> 16)) & 0xFF == 0xFF && ((bits >> 8) ^ bits) & 0xFF == 0xFF
     }
 
-    fn unpack(bits: u32, repeat: bool) -> Option<Self> {
-        let addr = ((bits) & 0xFF) as u8;
-        let cmd = ((bits >> 16) & 0xFF) as u8;
+    fn unpack(addr: u16, cmd: u16, repeat: bool) -> Option<Self> {
+        let addr = ((addr) & 0xFF) as u8;
+        let cmd = ((cmd) & 0xFF) as u8;
 
         Some(NecCommand { addr, cmd, repeat })
     }
@@ -61,6 +61,8 @@ impl AsButton for NecCommand {
         })
     }
 }
+
+/*
 
 /*
  * -------------------------------------------------------------------------
@@ -226,6 +228,7 @@ impl AsButton for NecAppleCommand {
         None
     }
 }
+*/
 
 /*
  * -------------------------------------------------------------------------
@@ -236,7 +239,8 @@ impl AsButton for NecAppleCommand {
 #[derive(Debug, Copy, Clone, PartialEq)]
 /// Nec Command without parsing of bit meaning
 pub struct NecRawCommand {
-    pub bits: u32,
+    pub addr: u16,
+    pub cmd: u16,
 }
 
 impl NecCommandVariant for NecRawCommand {
@@ -246,11 +250,11 @@ impl NecCommandVariant for NecRawCommand {
         true
     }
 
-    fn unpack(bits: u32, _repeat: bool) -> Option<Self> {
-        Some(NecRawCommand { bits })
+    fn unpack(addr: u16, cmd: u16, _repeat: bool) -> Option<Self> {
+        Some(NecRawCommand { addr, cmd })
     }
 
     fn pack(&self) -> u32 {
-        self.bits
+        0
     }
 }

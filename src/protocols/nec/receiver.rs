@@ -13,7 +13,8 @@ pub struct NecReceiverState<C = NecCommand> {
     // State
     status: InternalStatus,
     // Data buffer
-    bitbuf: u32,
+    bitbuf_addr: u16,
+    bitbuf_cmd: u16,
     // Timing and tolerances
     ranges: InfraRange4,
     // Last command (used by repeat)
@@ -31,7 +32,8 @@ impl<C: NecCommandVariant> InfraredReceiverState for NecReceiverState<C> {
 
         NecReceiverState {
             status: InternalStatus::Init,
-            bitbuf: 0,
+            bitbuf_addr: 0,
+            bitbuf_cmd: 0,
             ranges,
             last_cmd: 0,
             cmd_type: Default::default(),
@@ -47,12 +49,13 @@ impl<C: NecCommandVariant> InfraredReceiverState for NecReceiverState<C> {
         //};
 
         self.status = InternalStatus::Init;
-        self.last_cmd = if self.bitbuf == 0 {
-            self.last_cmd
-        } else {
-            self.bitbuf
-        };
-        self.bitbuf = 0;
+        //self.last_cmd = if self.bitbuf_addr == 0 {
+        //    self.last_cmd
+        //} else {
+        //    self.bitbuf_addr
+        //};
+        self.bitbuf_addr = 0;
+        self.bitbuf_cmd = 0;
         self.dt_save = 0;
     }
 }
@@ -63,7 +66,8 @@ pub enum InternalStatus {
     // Waiting for first pulse
     Init,
     // Receiving data
-    Receiving(u32),
+    ReceivingAddr(u16),
+    ReceivingCmd(u16),
     // Command received
     Done,
     // Repeat command received
@@ -100,15 +104,22 @@ where
             let pulsewidth = state.ranges.find::<PulseWidth>(state.dt_save + dt).unwrap_or(PulseWidth::NotAPulseWidth);
 
             state.status = match (state.status, pulsewidth) {
-                (Init,              Sync)   => Receiving(0),
+                (Init,              Sync)   => ReceivingAddr(0),
                 (Init,              Repeat) => RepeatDone,
                 (Init,              _)      => Init,
 
-                (Receiving(31),     One)    => { state.bitbuf |= 1 << 31; Done }
-                (Receiving(31),     Zero)   => Done,
-                (Receiving(bit),    One)    => { state.bitbuf |= 1 << bit; Receiving(bit + 1) }
-                (Receiving(bit),    Zero)   => Receiving(bit + 1),
-                (Receiving(_),      _)      => Err(Error::Data),
+                (ReceivingAddr(15),     One)    => { state.bitbuf_addr |= 1 << 15; ReceivingCmd(0) }
+                (ReceivingAddr(15),     Zero)   => ReceivingCmd(0),
+                (ReceivingAddr(bit),    One)    => { state.bitbuf_addr |= 1 << bit; ReceivingAddr(bit + 1) }
+                (ReceivingAddr(bit),    Zero)   => ReceivingAddr(bit + 1),
+                (ReceivingAddr(_),      _)      => Err(Error::Data),
+
+                (ReceivingCmd(15),     One)    => { state.bitbuf_cmd |= 1 << 15; Done }
+                (ReceivingCmd(15),     Zero)   => Done,
+                (ReceivingCmd(bit),    One)    => { state.bitbuf_cmd |= 1 << bit; ReceivingCmd(bit + 1) }
+                (ReceivingCmd(bit),    Zero)   => ReceivingCmd(bit + 1),
+                (ReceivingCmd(_),      _)      => Err(Error::Data),
+
 
                 (Done,              _)      => Done,
                 (RepeatDone,        _)      => RepeatDone,
@@ -126,8 +137,8 @@ where
 
     fn command(state: &Self::ReceiverState) -> Option<Self::Cmd> {
         match state.status {
-            InternalStatus::Done => Self::Cmd::unpack(state.bitbuf, false),
-            InternalStatus::RepeatDone => Self::Cmd::unpack(state.last_cmd, true),
+            InternalStatus::Done => Self::Cmd::unpack(state.bitbuf_addr, state.bitbuf_cmd, false),
+            InternalStatus::RepeatDone => Self::Cmd::unpack(state.bitbuf_addr, state.bitbuf_cmd, true),
             _ => None,
         }
     }

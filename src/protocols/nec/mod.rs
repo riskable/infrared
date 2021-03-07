@@ -6,7 +6,7 @@ pub mod sender;
 #[cfg(test)]
 mod tests;
 
-pub use cmds::{Nec16Command, NecAppleCommand, NecCommand, NecRawCommand, NecSamsungCommand};
+pub use cmds::{NecCommand, NecRawCommand};
 
 use crate::protocol::InfraredProtocol;
 use core::marker::PhantomData;
@@ -22,16 +22,16 @@ impl<C: NecCommandVariant> InfraredProtocol for Nec<C> {
 }
 
 /// Nec variant with Samsung bit encoding and Samsung timing
-pub type NecSamsung = Nec<NecSamsungCommand>;
+//pub type NecSamsung = Nec<NecSamsungCommand>;
 
 /// Nec variant with 16 bit address and Nec standard timing
-pub type Nec16 = Nec<Nec16Command>;
+//pub type Nec16 = Nec<Nec16Command>;
 
 /// Nec variant with Apple specific bit encoding and Standard timing
-pub type NecApple = Nec<NecAppleCommand>;
+//pub type NecApple = Nec<NecAppleCommand>;
 
 /// Nec variant without any specific bit unpacking, useful for debugging
-pub type NecDebug = Nec<NecRawCommand>;
+//pub type NecDebug = Nec<NecRawCommand>;
 
 /// Nec Command Variant
 pub trait NecCommandVariant: Sized {
@@ -41,7 +41,7 @@ pub trait NecCommandVariant: Sized {
     fn validate(bits: u32) -> bool;
 
     /// Unpack the bits into Command
-    fn unpack(bits: u32, repeat: bool) -> Option<Self>;
+    fn unpack(addr: u16, cmd: u16, repeat: bool) -> Option<Self>;
 
     /// Pack command into a u32
     fn pack(&self) -> u32;
