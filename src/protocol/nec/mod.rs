@@ -14,10 +14,10 @@ mod tests;
 use crate::protocol::Protocol;
 use core::marker::PhantomData;
 
-pub use apple::NecAppleCommand;
+pub use apple::AppleNecCommand;
 pub use nec16::Nec16Command;
 pub use raw::NecDebugCmd;
-pub use samsung::NecSamsungCommand;
+pub use samsung::SamsungNecCommand;
 pub use standard::NecCommand;
 
 /// Nec Receiver with Nec standard bit encoding and Standard timing
@@ -31,13 +31,13 @@ impl<C: NecCommandVariant> Protocol for Nec<C> {
 }
 
 /// Nec variant with Samsung bit encoding and Samsung timing
-pub type NecSamsung = Nec<NecSamsungCommand>;
+pub type SamsungNec = Nec<SamsungNecCommand>;
 
 /// Nec variant with 16 bit address and Nec standard timing
 pub type Nec16 = Nec<Nec16Command>;
 
 /// Nec variant with Apple specific bit encoding and Standard timing
-pub type NecApple = Nec<NecAppleCommand>;
+pub type AppleNec = Nec<AppleNecCommand>;
 
 /// Nec variant without any specific bit unpacking, useful for debugging
 pub type NecDebug = Nec<NecDebugCmd>;

@@ -3,7 +3,7 @@ use crate::{
     ProtocolId,
 };
 
-use crate::protocol::NecSamsungCommand;
+use crate::protocol::SamsungNecCommand;
 use Action::*;
 
 #[derive(Debug, Default)]
@@ -14,7 +14,7 @@ impl RemoteControlModel for SamsungTv {
     const DEVTYPE: DeviceType = DeviceType::TV;
     const PROTOCOL: ProtocolId = ProtocolId::NecSamsung;
     const ADDRESS: u32 = 7;
-    type Cmd = NecSamsungCommand;
+    type Cmd = SamsungNecCommand;
 
     const BUTTONS: &'static [(u32, Action)] = &[
         (2, Power),

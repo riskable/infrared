@@ -7,14 +7,14 @@ use crate::{
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct NecAppleCommand {
+pub struct AppleNecCommand {
     pub command_page: u8,
     pub command: u8,
     pub device_id: u8,
     pub repeat: bool,
 }
 
-impl NecCommandVariant for NecAppleCommand {
+impl NecCommandVariant for AppleNecCommand {
     const PULSE_DISTANCE: &'static NecPulseDistance = NEC_STANDARD_TIMING;
 
     fn validate(bits: u32) -> bool {
@@ -42,7 +42,7 @@ impl NecCommandVariant for NecAppleCommand {
         // 8 Bits (Changable by pairing)
         let device_id = ((bits >> 24) & 0xFF) as u8;
 
-        Some(NecAppleCommand {
+        Some(AppleNecCommand {
             command_page,
             command,
             device_id,
@@ -55,13 +55,13 @@ impl NecCommandVariant for NecAppleCommand {
     }
 }
 
-impl Command for NecAppleCommand {
+impl Command for AppleNecCommand {
     fn is_repeat(&self) -> bool {
         self.repeat
     }
 }
 
-impl AddressCommand for NecAppleCommand {
+impl AddressCommand for AppleNecCommand {
     fn address(&self) -> u32 {
         0
     }

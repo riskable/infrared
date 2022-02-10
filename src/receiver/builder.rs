@@ -8,7 +8,7 @@ use core::marker::PhantomData;
 use embedded_hal::digital::v2::InputPin;
 
 #[cfg(feature = "nec")]
-use crate::protocol::{Nec, Nec16, NecApple, NecSamsung};
+use crate::protocol::{Nec, Nec16, AppleNec, SamsungNec};
 
 #[cfg(feature = "denon")]
 use crate::protocol::Denon;
@@ -78,12 +78,12 @@ where
     }
 
     #[cfg(feature = "nec")]
-    pub fn nec_samsung(self) -> Builder<NecSamsung, S, IN> {
+    pub fn nec_samsung(self) -> Builder<SamsungNec, S, IN> {
         self.protocol()
     }
 
     #[cfg(feature = "nec")]
-    pub fn nec_apple(self) -> Builder<NecApple, S, IN> {
+    pub fn nec_apple(self) -> Builder<AppleNec, S, IN> {
         self.protocol()
     }
 

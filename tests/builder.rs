@@ -1,6 +1,6 @@
 use embedded_hal::digital::v2::InputPin;
 use infrared::{
-    protocol::{NecSamsung, Rc5},
+    protocol::{SamsungNec, Rc5},
     receiver::{ConstReceiver, DefaultInput, Event, Poll, Receiver},
     remotecontrol::{rc5::CdPlayer, Button},
 };
@@ -52,7 +52,7 @@ fn const_embedded_hal_receiver() {
     let _ = recv.event(204);
 
     let _recv = Receiver::builder()
-        .protocol::<NecSamsung>()
+        .protocol::<SamsungNec>()
         .event_driven()
         .build_const::<400_000>();
 }

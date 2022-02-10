@@ -1,5 +1,5 @@
 use crate::{
-    protocol::NecAppleCommand,
+    protocol::AppleNecCommand,
     remotecontrol::{Action, DeviceType, RemoteControlModel},
     ProtocolId,
 };
@@ -29,9 +29,9 @@ impl RemoteControlModel for Apple2009 {
     const DEVTYPE: DeviceType = DeviceType::Generic;
     const PROTOCOL: ProtocolId = ProtocolId::NecApple;
     const ADDRESS: u32 = 0;
-    type Cmd = NecAppleCommand;
+    type Cmd = AppleNecCommand;
 
-    fn decode(cmd: &NecAppleCommand) -> Option<Action> {
+    fn decode(cmd: &AppleNecCommand) -> Option<Action> {
         BUTTONS
             .iter()
             .find(|(c, _b)| c == &(cmd.command_page, cmd.command))

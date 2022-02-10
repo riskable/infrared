@@ -1,6 +1,6 @@
 use crate::{
     protocol::{
-        DenonCommand, Nec16Command, NecAppleCommand, NecCommand, NecDebugCmd, NecSamsungCommand,
+        DenonCommand, Nec16Command, AppleNecCommand, NecCommand, NecDebugCmd, SamsungNecCommand,
         Rc5Command, Rc6Command,
     },
     receiver::{DecoderStateMachine, DefaultInput, Event, PinInput, Receiver},
@@ -61,9 +61,9 @@ pub enum CmdEnum {
     #[cfg(feature = "nec")]
     Nec16(Nec16Command),
     #[cfg(feature = "nec")]
-    NecSamsung(NecSamsungCommand),
+    NecSamsung(SamsungNecCommand),
     #[cfg(feature = "nec")]
-    NecApple(NecAppleCommand),
+    NecApple(AppleNecCommand),
     #[cfg(feature = "nec")]
     NecDebug(NecDebugCmd),
     #[cfg(feature = "rc5")]
@@ -87,14 +87,14 @@ impl From<Nec16Command> for CmdEnum {
     }
 }
 #[cfg(feature = "nec")]
-impl From<NecSamsungCommand> for CmdEnum {
-    fn from(cmd: NecSamsungCommand) -> CmdEnum {
+impl From<SamsungNecCommand> for CmdEnum {
+    fn from(cmd: SamsungNecCommand) -> CmdEnum {
         CmdEnum::NecSamsung(cmd)
     }
 }
 #[cfg(feature = "nec")]
-impl From<NecAppleCommand> for CmdEnum {
-    fn from(cmd: NecAppleCommand) -> CmdEnum {
+impl From<AppleNecCommand> for CmdEnum {
+    fn from(cmd: AppleNecCommand) -> CmdEnum {
         CmdEnum::NecApple(cmd)
     }
 }
